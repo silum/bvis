@@ -1,9 +1,11 @@
+#include <err.h>
 #include <libgen.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include "arg.h"
 #include "hilbert.h"
@@ -22,6 +24,42 @@ die(const char *fmt, ...)
     exit(EXIT_FAILURE);
 }
 
+off_t
+fsize(FILE *fp)
+{
+    int fd = fileno(fp);
+    struct stat buf;
+    fstat(fd, &buf);
+    off_t size = buf.st_size;
+
+    return size;
+}
+
+void
+pchar(unsigned char *buf, int len, int n, int x, int y)
+{
+    int d = xy2d(n, y, x);
+    if (d < len) {
+        unsigned char c = buf[d];
+        if (0 == c) {  /* 0x00 - black */
+            printf("%d %d %d", 0x00, 0x2b, 0x36);
+        } else if (c < ' '
+                   && !('\t' == c
+                        || '\r' == c
+                        || '\n' == c)) {  /* low - green */
+            printf("%d %d %d", 0x85, 0x99, 0x00);
+        } else if (c < 127) {  /* ascii - blue */
+            printf("%d %d %d", 0x26, 0x8b, 0xd2);
+        } else if (c < 255) {  /* high - red */
+            printf("%d %d %d", 0xdc, 0x32, 0x2f);
+        } else {  /* 0xff - white */
+            printf("%d %d %d", 0xfd, 0xf6, 0xe3);
+        }
+    } else {
+        printf("0 0 0");
+    }
+}
+
 void
 usage(void)
 {
@@ -31,16 +69,38 @@ usage(void)
     exit(EXIT_SUCCESS);
 }
 
+void
+bvis(FILE *fp, int order)
+{
+    int n = pow(2, order);
+    int N = n * n;
+
+    off_t size = fsize(fp);
+    int blocks = (size / N) + ((size % N) ? 1 : 0);
+    int rows = blocks * n;
+    printf("P3 %d %d 255\n", n, rows);
+
+    for (int b = 0; b < blocks; b++) {
+        unsigned char buf[N];
+        int len = fread(buf, sizeof *buf, N, fp);
+        for (int y = 0; y < n; y++) {
+            for (int x = 0; x < n; x++) {
+                pchar(buf, len, n, x, y);
+                printf("%c", (x < n - 1) ? ' ' : '\n');
+            }
+        }
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
-    int N, n, o;
+    int order = 2;
 
-    o = 2;
     ARGBEGIN() {
     case 'o':
-        o = atoi(EARGF(die("`-%c' expects an operand\n", ARGC())));
-        o = (o < 1) ? 1 : o;
+        order = atoi(EARGF(die("`-%c' expects an operand\n", ARGC())));
+        order = (order < 1) ? 1 : order;
         break;
     case 'h':
         /* fall */
@@ -51,25 +111,23 @@ main(int argc, char *argv[])
     default:
         die("unexpected option: `%c'", ARGC());
     } ARGEND();
+
+    FILE *fp = NULL;
     if (*argv) {
-        die("unexpected argument: `%s'", *argv);
+        fp = fopen(*argv, "rb");
+        if (NULL == fp) {
+            err(EXIT_FAILURE, "cannot open `%s' for reading", *argv);
+        }
+    } else {
+        die("filename expected\n");
     }
 
-    n = pow(2, o);
-    N = n * n;
+    bvis(fp, order);
 
-    bool done = false;
-    for (int y = 0; !done; y++) {
-        for (int x = 0; x < n; x++) {
-            if (N <= y * n + x) {
-                done = true;
-                break;
-            }
-            int d = xy2d(n, y, x);
-            printf(" %4d", d);
-        }
-        if (!done) {
-            printf("\n");
-        }
+    argv++;
+    if (*argv) {
+        die("unexpected argument: %s\n", *argv);
     }
+
+    return EXIT_SUCCESS;
 }
