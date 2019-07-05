@@ -42,21 +42,21 @@ pchar(unsigned char *buf, int len, int n, int x, int y)
     if (d < len) {
         unsigned char c = buf[d];
         if (0 == c) {  /* 0x00 - black */
-            printf("%d %d %d", 0x00, 0x2b, 0x36);
+            printf("%c%c%c", 0x00, 0x2b, 0x36);
         } else if (c < ' '
                    && !('\t' == c
                         || '\r' == c
                         || '\n' == c)) {  /* low - green */
-            printf("%d %d %d", 0x85, 0x99, 0x00);
+            printf("%c%c%c", 0x85, 0x99, 0x00);
         } else if (c < 127) {  /* ascii - blue */
-            printf("%d %d %d", 0x26, 0x8b, 0xd2);
+            printf("%c%c%c", 0x26, 0x8b, 0xd2);
         } else if (c < 255) {  /* high - red */
-            printf("%d %d %d", 0xdc, 0x32, 0x2f);
+            printf("%c%c%c", 0xdc, 0x32, 0x2f);
         } else {  /* 0xff - white */
-            printf("%d %d %d", 0xfd, 0xf6, 0xe3);
+            printf("%c%c%c", 0xfd, 0xf6, 0xe3);
         }
     } else {
-        printf("0 0 0");
+        printf("%c%c%c", 0, 0, 0);
     }
 }
 
@@ -78,7 +78,7 @@ bvis(FILE *fp, int order)
     off_t size = fsize(fp);
     int blocks = (size / N) + ((size % N) ? 1 : 0);
     int rows = blocks * n;
-    printf("P3 %d %d 255\n", n, rows);
+    printf("P6 %d %d 255\n", n, rows);
 
     for (int b = 0; b < blocks; b++) {
         unsigned char buf[N];
@@ -86,7 +86,6 @@ bvis(FILE *fp, int order)
         for (int y = 0; y < n; y++) {
             for (int x = 0; x < n; x++) {
                 pchar(buf, len, n, x, y);
-                printf("%c", (x < n - 1) ? ' ' : '\n');
             }
         }
     }
