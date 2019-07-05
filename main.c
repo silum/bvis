@@ -64,12 +64,6 @@ main(int argc, char *argv[])
     n = pow(2, o);
     N = n * n;
 
-    for (int d = 0; d < N; d++) {
-        int x, y;
-        d2xy(n, d, &x, &y);
-        printf("d: %d -> (%d, %d)\n", d, x, y);
-    }
-
     bool done = false;
     for (int y = 0; !done; y++) {
         for (int x = 0; x < n; x++) {
@@ -78,7 +72,7 @@ main(int argc, char *argv[])
                 break;
             }
             int d = xy2d(n, y, x);
-            printf(" (%2d, %2d): %4d", y, x, d);
+            printf(" %4d", d);
         }
         if (!done) {
             printf("\n");
