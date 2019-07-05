@@ -23,18 +23,12 @@ die(const char *fmt, ...)
 }
 
 void
-err_operand(char c)
+usage(void)
 {
-    fprintf(stderr, "`%c' expects an operand\n", c);
-}
-
-void
-usage(int ret)
-{
-    FILE *fp = (0 == ret) ? stdout : stderr;
-    fprintf(fp, "Usage: %s [-o<num>] [file]\n", basename(argv0));
-    fprintf(fp, "Usage: %s [-?h]\n", basename(argv0));
-    exit(ret);
+    const char *prog = basename(argv0);
+    printf("Usage: %s [-o<num>] [file]\n", prog);
+    printf("Usage: %s [-?h]\n", prog);
+    exit(EXIT_SUCCESS);
 }
 
 int
@@ -45,13 +39,13 @@ main(int argc, char *argv[])
     o = 2;
     ARGBEGIN() {
     case 'o':
-        o = atoi(EARGF(err_operand(ARGC())));
+        o = atoi(EARGF(die("`-%c' expects an operand\n", ARGC())));
         o = (o < 1) ? 1 : o;
         break;
     case 'h':
         /* fall */
     case '?':
-        usage(EXIT_SUCCESS);
+        usage();
         /* unreached */
         break;
     default:
