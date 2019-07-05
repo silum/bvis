@@ -12,7 +12,7 @@
 #include "hilbert.h"
 
 char *argv0;
-const uint32_t *map = asc;
+const uint32_t *map = Asc;
 
 void
 die(const char *fmt, ...)
@@ -54,7 +54,7 @@ void
 usage(void)
 {
     const char *prog = basename(argv0);
-    printf("Usage: %s [-c<a|d|e|m>] [-o<num>] [file]\n", prog);
+    printf("Usage: %s [-c<A|a|d|e|m>] [-o<num>] [file]\n", prog);
     printf("Usage: %s [-?h]\n", prog);
     exit(EXIT_SUCCESS);
 }
@@ -94,6 +94,7 @@ main(int argc, char *argv[])
         } else {
             char *c = ARGF();
             switch (*c) {
+            case 'A': map = Asc; break;
             case 'a': map = asc; break;
             case 'd': map = det; break;
             case 'e': map = ent; break;
