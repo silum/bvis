@@ -1,8 +1,8 @@
-BIN = hilbert
+BIN = bvis
 CFLAGS += -Wall -Wextra -Wpedantic
 
 SOURCES = $(wildcard *.c)
-hilbert: $(SOURCES:.c=.o)
+bvis: $(SOURCES:.c=.o)
 
 .PHONY: all
 all: $(BIN)
