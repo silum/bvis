@@ -8,9 +8,11 @@
 #include <sys/stat.h>
 
 #include "arg.h"
+#include "cmap.h"
 #include "hilbert.h"
 
 char *argv0;
+const uint32_t *map = asc;
 
 void
 die(const char *fmt, ...)
@@ -41,20 +43,8 @@ pchar(unsigned char *buf, int len, int n, int x, int y)
     int d = xy2d(n, y, x);
     if (d < len) {
         unsigned char c = buf[d];
-        if (0 == c) {  /* 0x00 - black */
-            printf("%c%c%c", 0x00, 0x2b, 0x36);
-        } else if (c < ' '
-                   && !('\t' == c
-                        || '\r' == c
-                        || '\n' == c)) {  /* low - green */
-            printf("%c%c%c", 0x85, 0x99, 0x00);
-        } else if (c < 127) {  /* ascii - blue */
-            printf("%c%c%c", 0x26, 0x8b, 0xd2);
-        } else if (c < 255) {  /* high - red */
-            printf("%c%c%c", 0xdc, 0x32, 0x2f);
-        } else {  /* 0xff - white */
-            printf("%c%c%c", 0xfd, 0xf6, 0xe3);
-        }
+        uint32_t col = map[c];
+        printf("%c%c%c", col >> 16 & 0xff, col >> 8 & 0xff, col & 0xff);
     } else {
         printf("%c%c%c", 0, 0, 0);
     }
@@ -64,7 +54,7 @@ void
 usage(void)
 {
     const char *prog = basename(argv0);
-    printf("Usage: %s [-o<num>] [file]\n", prog);
+    printf("Usage: %s [-c<a|d|e|m>] [-o<num>] [file]\n", prog);
     printf("Usage: %s [-?h]\n", prog);
     exit(EXIT_SUCCESS);
 }
@@ -97,18 +87,34 @@ main(int argc, char *argv[])
     int order = 2;
 
     ARGBEGIN() {
+    case 'c':
+        if (NULL == ARGF()) {
+            die("`-%c' expects a colormap selector\n", ARGC()); break;
+            /* unreachable */
+        } else {
+            char *c = ARGF();
+            switch (*c) {
+            case 'a': map = asc; break;
+            case 'd': map = det; break;
+            case 'e': map = ent; break;
+            case 'm': map = mag; break;
+            default: die("invalid colormap selector: `%c'", *c);
+            }
+        }
+        break;
     case 'o':
-        order = atoi(EARGF(die("`-%c' expects an operand\n", ARGC())));
+        order = atoi(EARGF(die("`-%c' expects an order value\n", ARGC())));
         order = (order < 1) ? 1 : order;
         break;
     case 'h':
         /* fall */
     case '?':
         usage();
-        /* unreached */
+        /* unreachable */
         break;
     default:
         die("unexpected option: `%c'", ARGC());
+        /* unreachable */
     } ARGEND();
 
     FILE *fp = NULL;
