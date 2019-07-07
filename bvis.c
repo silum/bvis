@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 
 #include "arg.h"
@@ -50,29 +51,66 @@ pchar(unsigned char *buf, int len, int n, int x, int y)
     }
 }
 
+double
+shannon(unsigned char *buf, int len)
+{
+    int hist[256] = {0};
+    for (int i = 0; i < len; i++) {
+        int c = buf[i];
+        hist[c] += 1;
+    }
+    double ent = 0;
+    for (int i = 0; i < 256; i++) {
+        if (0 < hist[i]) {
+            double p_x = (double)hist[i] / len;
+            ent -= p_x * log2(p_x);
+        }
+    }
+    return ent;
+}
+
 void
 usage(void)
 {
     const char *prog = basename(argv0);
-    printf("Usage: %s [-c<A|a|d|e|m>] [-o<num>] [file]\n", prog);
+    printf("Usage: %s [-c<A|a|d|e|m>] [-e|-E[num]] [-o<num>] [file]\n", prog);
     printf("Usage: %s [-?h]\n", prog);
     exit(EXIT_SUCCESS);
 }
 
 void
-bvis(FILE *fp, int order)
+bvis(FILE *fp, int order, bool do_ent, unsigned entlen)
 {
     int n = pow(2, order);
     int N = n * n;
+    off_t flen = fsize(fp);
+    entlen = (0 == entlen) ? flen : entlen;
 
-    off_t size = fsize(fp);
-    int blocks = (size / N) + ((size % N) ? 1 : 0);
+    int blen = (do_ent) ? entlen : 1;
+    off_t size = flen / blen + (0 != (flen % blen));
+    int blocks = size / N + (0 != (size % N));
+    blocks = (0 == blocks) ? 1 : blocks;
     int rows = blocks * n;
     printf("P6 %d %d 255\n", n, rows);
 
     for (int b = 0; b < blocks; b++) {
         unsigned char buf[N];
-        int len = fread(buf, sizeof *buf, N, fp);
+        int len = 0;
+        if (do_ent) {
+            for (int i = 0; i < N; i++) {
+                unsigned char entbuf[entlen];
+                size_t nread = fread(entbuf, sizeof *entbuf, entlen, fp);
+                if (0 == nread) {
+                    break;
+                }
+                double ent = shannon(entbuf, nread);
+                fprintf(stderr, "%f\n", ent);
+                buf[i] = round(ent / 8 * 255);
+                len = i + 1;
+            }
+        } else {
+            len = fread(buf, sizeof *buf, N, fp);
+        }
         for (int y = 0; y < n; y++) {
             for (int x = 0; x < n; x++) {
                 pchar(buf, len, n, x, y);
@@ -84,6 +122,8 @@ bvis(FILE *fp, int order)
 int
 main(int argc, char *argv[])
 {
+    bool do_ent = false;
+    int entlen = 2048;
     int order = 2;
 
     ARGBEGIN() {
@@ -103,9 +143,19 @@ main(int argc, char *argv[])
             }
         }
         break;
+    case 'e':
+        do_ent = true;
+        map = ent;
+        break;
+    case 'E':
+        do_ent = true;
+        map = ent;
+        entlen = atoi(EARGF(die("`-%c' expects a block size\n", ARGC())));
+        entlen = (entlen < 0) ? 0 : entlen;
+        break;
     case 'o':
         order = atoi(EARGF(die("`-%c' expects an order value\n", ARGC())));
-        order = (order < 1) ? 1 : order;
+        order = (order < 0) ? 0 : order;
         break;
     case 'h':
         /* fall */
@@ -128,7 +178,7 @@ main(int argc, char *argv[])
         die("filename expected\n");
     }
 
-    bvis(fp, order);
+    bvis(fp, order, do_ent, entlen);
 
     argv++;
     if (*argv) {
