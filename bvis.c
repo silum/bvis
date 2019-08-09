@@ -73,7 +73,7 @@ void
 usage(void)
 {
     const char *prog = basename(argv0);
-    printf("Usage: %s [-c<A|a|d|e|m>] [-e|-E[num]] [-o<num>] [file]\n", prog);
+    printf("Usage: %s [-c<A|a|d|e|m|r>] [-e|-E[num]] [-o<num>] [file]\n", prog);
     printf("Usage: %s [-?h]\n", prog);
     exit(EXIT_SUCCESS);
 }
@@ -139,6 +139,7 @@ main(int argc, char *argv[])
             case 'd': map = det; break;
             case 'e': map = ent; break;
             case 'm': map = mag; break;
+            case 'r': map = rad; break;
             default: die("invalid colormap selector: `%c'", *c);
             }
         }
