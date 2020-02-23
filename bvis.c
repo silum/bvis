@@ -13,7 +13,7 @@
 #include "hilbert.h"
 
 char *argv0;
-const uint32_t *cmap;
+const uint32_t *cmap = ent;
 
 void
 die(const char *fmt, ...)
@@ -159,11 +159,9 @@ main(int argc, char *argv[])
         break;
     case 'e':
         do_ent = true;
-        cmap = ent;
         break;
     case 'E':
         do_ent = true;
-        cmap = ent;
         entlen = atoi(EARGF(die("`-%c' expects a block size", ARGC())));
         entlen = (entlen < 0) ? 0 : entlen;
         break;
@@ -190,10 +188,6 @@ main(int argc, char *argv[])
         }
     } else {
         die("filename expected");
-    }
-
-    if (NULL == cmap) {
-        cmap = map(asc_index, Asc_color);
     }
 
     bvis(fp, order, do_ent, entlen);
