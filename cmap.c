@@ -1,6 +1,4 @@
-/*
- * colormaps blatantly stolen from binvis.io
- */
+/* colormaps, some blatantly stolen from <binvis.io> */
 #include <stdint.h>
 
 #include "cmap.h"

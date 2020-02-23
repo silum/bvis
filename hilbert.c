@@ -1,6 +1,4 @@
-/*
- * from https://en.wikipedia.org/wiki/Hilbert_curve
- */
+/* from <wikipedia.org/wiki/Hilbert_curve> */
 
 #include "hilbert.h"
 
