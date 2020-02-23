@@ -1,5 +1,5 @@
 BIN = bvis
-CFLAGS += -Wall -Wextra -Wpedantic
+CFLAGS += -std=c99 -Wall -Wextra -Wpedantic
 
 SOURCES = $(wildcard *.c)
 bvis: $(SOURCES:.c=.o)
