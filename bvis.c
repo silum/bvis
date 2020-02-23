@@ -13,7 +13,7 @@
 #include "hilbert.h"
 
 char *argv0;
-const uint32_t *map = Asc;
+const uint32_t *cmap;
 
 void
 die(const char *fmt, ...)
@@ -38,13 +38,24 @@ fsize(FILE *fp)
     return size;
 }
 
+uint32_t const *
+map(unsigned char index[NUM_CHARS], uint32_t color[NUM_COLORS])
+{
+    static uint32_t cmap[NUM_CHARS];
+    for (unsigned i = 0; i < NUM_CHARS; i++) {
+        cmap[i] = color[index[i]];
+    }
+
+    return cmap;
+}
+
 void
 pchar(unsigned char *buf, int len, int n, int x, int y)
 {
     int d = xy2d(n, y, x);
     if (d < len) {
         unsigned char c = buf[d];
-        uint32_t col = map[c];
+        uint32_t col = cmap[c];
         printf("%c%c%c", col >> 16 & 0xff, col >> 8 & 0xff, col & 0xff);
     } else {
         printf("%c%c%c", 0, 0, 0);
@@ -134,23 +145,23 @@ main(int argc, char *argv[])
         } else {
             char *c = ARGF();
             switch (*c) {
-            case 'A': map = Asc; break;
-            case 'a': map = asc; break;
-            case 'd': map = det; break;
-            case 'e': map = ent; break;
-            case 'm': map = mag; break;
-            case 'r': map = rad; break;
+            case 'A': cmap = map(asc_index, Asc_color); break;
+            case 'a': cmap = map(asc_index, asc_color); break;
+            case 'd': cmap = det; break;
+            case 'e': cmap = ent; break;
+            case 'm': cmap = mag; break;
+            case 'r': cmap = map(rad_index, rad_color); break;
             default: die("invalid colormap selector: `%c'", *c);
             }
         }
         break;
     case 'e':
         do_ent = true;
-        map = ent;
+        cmap = ent;
         break;
     case 'E':
         do_ent = true;
-        map = ent;
+        cmap = ent;
         entlen = atoi(EARGF(die("`-%c' expects a block size\n", ARGC())));
         entlen = (entlen < 0) ? 0 : entlen;
         break;
@@ -177,6 +188,10 @@ main(int argc, char *argv[])
         }
     } else {
         die("filename expected\n");
+    }
+
+    if (NULL == cmap) {
+        cmap = map(asc_index, Asc_color);
     }
 
     bvis(fp, order, do_ent, entlen);

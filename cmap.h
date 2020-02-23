@@ -1,11 +1,18 @@
 #ifndef CMAP_H
 #define CMAP_H
 
-extern uint32_t Asc[256];
-extern uint32_t asc[256];
-extern uint32_t det[256];
-extern uint32_t ent[256];
-extern uint32_t mag[256];
-extern uint32_t rad[256];
+#define NUM_CHARS  256
+#define NUM_COLORS  5
+
+extern uint32_t Asc_color[NUM_COLORS];
+extern uint32_t asc_color[NUM_COLORS];
+extern unsigned char asc_index[NUM_CHARS];
+
+extern uint32_t det[NUM_CHARS];
+extern uint32_t ent[NUM_CHARS];
+extern uint32_t mag[NUM_CHARS];
+
+extern uint32_t rad_color[NUM_COLORS];
+extern unsigned char rad_index[NUM_CHARS];
 
 #endif  /* CMAP_H */
