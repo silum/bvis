@@ -86,7 +86,7 @@ void
 usage(void)
 {
     const char *prog = basename(argv0);
-    printf("Usage: %s [-c <a|A|d|e|m|r>] [-e | -E <num>] [-o <num>] [file]\n", prog);
+    printf("Usage: %s [-c <a|A|d|e|m|r>] [-e | -E <num>] [-o <num>] [file|-]\n", prog);
     printf("Usage: %s [-?h]\n", prog);
     exit(EXIT_SUCCESS);
 }
@@ -182,18 +182,19 @@ main(int argc, char *argv[])
 
     FILE *fp = NULL;
     if (*argv) {
-        fp = fopen(*argv, "rb");
+        fp = ('-' == (*argv)[0] && '\0' == (*argv)[1])
+            ? stdin
+            : fopen(*argv, "rb");
         if (NULL == fp) {
             err(EXIT_FAILURE, "cannot open `%s' for reading", *argv);
         }
     } else {
-        die("filename expected");
+        usage();
     }
 
     bvis(fp, order, do_ent, entlen);
 
-    argv++;
-    if (*argv) {
+    if (++argv, 0 < --argc) {
         die("unexpected argument: %s", *argv);
     }
 
