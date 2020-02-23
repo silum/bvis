@@ -65,13 +65,13 @@ pchar(unsigned char *buf, int len, int n, int x, int y)
 double
 shannon(unsigned char *buf, int len)
 {
-    int hist[256] = {0};
+    int hist[NUM_CHARS] = { 0 };
     for (int i = 0; i < len; i++) {
         int c = buf[i];
         hist[c] += 1;
     }
     double ent = 0;
-    for (int i = 0; i < 256; i++) {
+    for (int i = 0; i < NUM_CHARS; i++) {
         if (0 < hist[i]) {
             double p_x = (double)hist[i] / len;
             ent -= p_x * log2(p_x);
