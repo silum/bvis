@@ -1,0 +1,81 @@
+.Dd Feb 23, 2020
+.Dt BVIS 1
+.Os
+.Sh NAME
+.Nm bvis
+.Nd calculate file entropy
+.Sh SYNOPSIS
+.Nm
+.Op Fl c Ar colormap
+.Op Fl e Ar block-size
+.Op Fl o Ar order
+.Op Ar file | -
+.Sh DESCRIPTION
+.Nm
+calculates the entropy of the file and produces a visual representation as a
+.Xr ppm 5
+stream.
+.Pp
+When
+.Fl e
+is used, a column of numbers is produced on standard error, one number per block.
+Use
+.Fl e Ar 0
+to calculate the entropy of the file as a whole.
+.Pp
+The output follows a Hilbert curve, thus the width of the image can
+only be an integer power of 2; the width is controlled by the
+.Fl o Ar order
+flag.
+.Pp
+Its arguments are as follows:
+.Bl -tag -width Ds
+.It Fl c Ar colormap
+Use the selected colormap in the output image.
+The options for
+.Ar colormap
+are:
+.Bl -tag -compact -width 2n
+.It Ar a
+ASCII
+.It Ar A
+Alternate ASCII
+.It Ar d
+Detail
+.It Ar e
+Entropy -- default if no colormap is specified
+.It Ar m
+Magnitude
+.It Ar r
+Radare2
+.El
+.It Fl e Ar block-size
+Calculate block entropy and output to standard error.
+Each block is
+.Ar block-size
+bytes in length.
+.It Fl o Ar order
+Sets the output image width to 2 to the power of
+.Ar order .
+.
+.It Ar file
+The name of the file that should be processed.
+.Sq -
+indicates standard input.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh EXAMPLES
+.Bd -literal
+# create an entropy .pnm of `bvis' itself
+bvis bvis > bvis.pnm
+.Pp
+# specify the `ls' entropy image width as 2^8 = 256 pixels,
+# using the magnitude colormap
+bvis -c m -o 8 /bin/ls > ls.pnm
+.Pp
+# calculate the file entropy of `ls' and output to `ls.ent'
+bvis -e 0 /bin/ls >/dev/null 2>&1 > ls.ent
+.Ed
+.Sh SEE ALSO
+.Xr ppm 5
