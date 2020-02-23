@@ -1,12 +1,9 @@
-/*
- * Uses EXIT_FAILURE (from stdlib.h), and NULL (from stddef.h).
- */
+/* Uses EXIT_FAILURE (from stdlib.h), and NULL (from stddef.h). */
 
-/*
- * The following files served as inspiration for the code below:
+/* The following files served as inspiration for the code below:
  *
- * - https://git.suckless.org/st/file/arg.h.html
- * - https://git.suckless.org/farbfeld/file/arg.h.html
+ * - <git.suckless.org/st/file/arg.h.html>
+ * - <git.suckless.org/farbfeld/file/arg.h.html>
  */
 
 #ifndef ARG_H
