@@ -66,19 +66,20 @@ pchar(unsigned char *buf, int len, int n, int x, int y)
 double
 shannon(unsigned char *buf, int len)
 {
-    int hist[NUM_CHARS] = { 0 };
+    int histogram[NUM_CHARS] = { 0 };
     for (int i = 0; i < len; i++) {
         int c = buf[i];
-        hist[c] += 1;
+        histogram[c] += 1;
     }
-    double ent = 0;
+
+    double entropy = 0;
     for (int i = 0; i < NUM_CHARS; i++) {
-        if (0 < hist[i]) {
-            double p_x = (double)hist[i] / len;
-            ent -= p_x * log2(p_x);
+        if (0 < histogram[i]) {
+            double p_x = (double)histogram[i] / len;
+            entropy -= p_x * log2(p_x);
         }
     }
-    return ent;
+    return entropy;
 }
 
 void
