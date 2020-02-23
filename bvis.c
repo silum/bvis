@@ -86,7 +86,7 @@ void
 usage(void)
 {
     const char *prog = basename(argv0);
-    printf("Usage: %s [-c<A|a|d|e|m|r>] [-e|-E[num]] [-o<num>] [file]\n", prog);
+    printf("Usage: %s [-c <a|A|d|e|m|r>] [-e | -E <num>] [-o <num>] [file]\n", prog);
     printf("Usage: %s [-?h]\n", prog);
     exit(EXIT_SUCCESS);
 }
@@ -147,8 +147,8 @@ main(int argc, char *argv[])
         } else {
             char *c = ARGF();
             switch (*c) {
-            case 'A': cmap = map(asc_index, Asc_color); break;
             case 'a': cmap = map(asc_index, asc_color); break;
+            case 'A': cmap = map(asc_index, Asc_color); break;
             case 'd': cmap = det; break;
             case 'e': cmap = ent; break;
             case 'm': cmap = mag; break;
