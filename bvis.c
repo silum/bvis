@@ -20,10 +20,11 @@ die(const char *fmt, ...)
 {
     va_list ap;
 
-    va_start(ap, fmt);
     fprintf(stderr, "%s: ", basename(argv0));
+    va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
     va_end(ap);
+    fprintf(stderr, "\n");
     exit(EXIT_FAILURE);
 }
 
@@ -140,7 +141,7 @@ main(int argc, char *argv[])
     ARGBEGIN() {
     case 'c':
         if (NULL == ARGF()) {
-            die("`-%c' expects a colormap selector\n", ARGC()); break;
+            die("`-%c' expects a colormap selector", ARGC()); break;
             /* unreachable */
         } else {
             char *c = ARGF();
@@ -162,11 +163,11 @@ main(int argc, char *argv[])
     case 'E':
         do_ent = true;
         cmap = ent;
-        entlen = atoi(EARGF(die("`-%c' expects a block size\n", ARGC())));
+        entlen = atoi(EARGF(die("`-%c' expects a block size", ARGC())));
         entlen = (entlen < 0) ? 0 : entlen;
         break;
     case 'o':
-        order = atoi(EARGF(die("`-%c' expects an order value\n", ARGC())));
+        order = atoi(EARGF(die("`-%c' expects an order value", ARGC())));
         order = (order < 0) ? 0 : order;
         break;
     case 'h':
@@ -187,7 +188,7 @@ main(int argc, char *argv[])
             err(EXIT_FAILURE, "cannot open `%s' for reading", *argv);
         }
     } else {
-        die("filename expected\n");
+        die("filename expected");
     }
 
     if (NULL == cmap) {
@@ -198,7 +199,7 @@ main(int argc, char *argv[])
 
     argv++;
     if (*argv) {
-        die("unexpected argument: %s\n", *argv);
+        die("unexpected argument: %s", *argv);
     }
 
     return EXIT_SUCCESS;
