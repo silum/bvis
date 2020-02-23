@@ -12,6 +12,8 @@
 #include "cmap.h"
 #include "hilbert.h"
 
+void usage(void);
+
 char *argv0;
 const uint32_t *cmap = ent;
 
@@ -25,7 +27,7 @@ die(const char *fmt, ...)
     vfprintf(stderr, fmt, ap);
     va_end(ap);
     fprintf(stderr, "\n");
-    exit(EXIT_FAILURE);
+    usage();
 }
 
 off_t
@@ -85,10 +87,8 @@ shannon(unsigned char *buf, int len)
 void
 usage(void)
 {
-    const char *prog = basename(argv0);
-    printf("Usage: %s [-c <a|A|d|e|m|r>] [-e | -E <num>] [-o <num>] [file|-]\n", prog);
-    printf("Usage: %s [-?h]\n", prog);
-    exit(EXIT_SUCCESS);
+    fprintf(stderr, "usage: %s [-c <a|A|d|e|m|r>] [-e <num>] [-o <num>] [file|-]\n", basename(argv0));
+    exit(EXIT_FAILURE);
 }
 
 void
@@ -159,21 +159,12 @@ main(int argc, char *argv[])
         break;
     case 'e':
         do_ent = true;
-        break;
-    case 'E':
-        do_ent = true;
         entlen = atoi(EARGF(die("`-%c' expects a block size", ARGC())));
         entlen = (entlen < 0) ? 0 : entlen;
         break;
     case 'o':
         order = atoi(EARGF(die("`-%c' expects an order value", ARGC())));
         order = (order < 0) ? 0 : order;
-        break;
-    case 'h':
-        /* fall */
-    case '?':
-        usage();
-        /* unreachable */
         break;
     default:
         die("unexpected option: `%c'", ARGC());
